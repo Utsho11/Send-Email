@@ -5,6 +5,7 @@ const fs = require("fs");
 const admin = require("firebase-admin");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const Papa = require("papaparse");
 const nodemailer = require("nodemailer");
 
 dotenv.config();
@@ -173,24 +174,37 @@ app.post("/investors", async (req, res) => {
 app.post("/upload-csv", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const results = [];
-  fs.createReadStream(req.file.path)
-    .pipe(csv())
-    .on("data", (data) => results.push(data))
-    .on("end", async () => {
-      fs.unlinkSync(req.file.path); // Remove temp file
+  console.log(req.body.listid);
 
-      try {
-        const listRef = db.collection("investorLists").doc();
-        await listRef.set({ listName: req.body.listName, contacts: results });
+  try {
+    // Read file contents
+    const fileContent = await fs.promises.readFile(req.file.path, "utf-8");
 
-        res
-          .status(201)
-          .json({ id: listRef.id, message: "CSV uploaded successfully!" });
-      } catch (error) {
-        res.status(500).json({ error: error.message });
-      }
+    // Parse CSV using PapaParse
+    const { data, errors } = Papa.parse(fileContent, {
+      header: true, // Parse first row as headers
+      skipEmptyLines: true,
     });
+
+    if (errors.length > 0) {
+      return res
+        .status(400)
+        .json({ error: "Invalid CSV format", details: errors });
+    }
+
+    // Remove temp file
+    fs.unlinkSync(req.file.path);
+
+    // Store in Firestore
+    const listRef = db.collection("investorLists").doc();
+    await listRef.set({ listName: req.body.listName, contacts: data });
+
+    res
+      .status(201)
+      .json({ id: listRef.id, message: "CSV uploaded successfully!" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get all users from Firestore

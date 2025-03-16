@@ -3,11 +3,12 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Upload, Check, File, Loader, X, ArrowLeft } from "lucide-react";
 import { Modal, Steps } from "antd";
 import axios from "axios";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 const CSVContact = () => {
-  const methods = useForm({ defaultValues: { listName: "", file: null } });
-  const { register, handleSubmit, setValue, reset } = methods;
+  const { id } = useParams();
+  const methods = useForm({ defaultValues: { listId: id, file: null } });
+  const { handleSubmit, setValue, reset } = methods;
   const [fileName, setFileName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -72,16 +73,6 @@ const CSVContact = () => {
 
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {/* Contact List Name */}
-          <div>
-            <label className="font-semibold">Contact List Name</label>
-            <input
-              {...register("listName", { required: "List name is required" })}
-              className="border rounded-md px-3 py-2 w-full mt-2"
-              placeholder="Enter list name"
-            />
-          </div>
-
           {/* File Upload */}
           <div>
             <label className="font-semibold">Upload CSV File</label>

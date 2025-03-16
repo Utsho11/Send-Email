@@ -24,7 +24,7 @@ function App() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-300 to-indigo-600">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-300 to-slate-600">
       <div className="bg-white shadow-2xl rounded-xl p-8 max-w-sm w-full text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome Back!</h1>
         <p className="text-gray-500 mb-4">Sign in to continue</p>
